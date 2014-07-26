@@ -8,7 +8,7 @@ if(empty($_REQUEST['imgdata'])==false){
 	$time=time();
 	$filename=$time.'.jpg';
 	file_put_contents($filename,base64_decode($imgdata[1]));
-	echo 'http://fh13121a.bget.ru/img/'.$filename;
+	echo 'http://sbi.ccloli.com/img/'.$filename;
 	$data=explode(' ',file_get_contents('data.txt'));
 	$new_data='';
 	$num=count($data);

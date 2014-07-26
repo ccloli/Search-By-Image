@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.3
+// @version     1.4.2
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -43,20 +43,24 @@ var default_setting={
 	"site_option":["Google","Baidu ShiTu","Baidu Image","Bing","TinEye","Яндекс (Yandex)","Sogou","360 ShiTu","SauceNAO","IQDB","3D IQDB"],
 	"hot_key":"ctrlKey"
 };
-
-var server_url="//sbi.ccloli.com/img/upload.php";
-// 在此处直接输入完整的上传页面的地址（Firefox 请尽量选择支持 https 的服务器）
-// 地址前使用"//"表示按照当前页面设定决定是否使用 https
-// 地址前使用"http://"表示强制使用 http
-// 地址前使用"https://"表示强制使用 https（需确认服务器支持 ssl）
-// 如果需要自己架设上传服务器的话请访问 GitHub 项目页（https://github.com/ccloli/Search-By-Image）获取服务端
-// 其他可用的上传服务器如下：
-// Heroku: //search-by-image.herokuapp.com/img/upload.php （支持 https）
-// BeGet: http://fh13121a.bget.ru/img/upload.php （不支持 https）
-// OpenShift: //searchbyimage-864907600cc.rhcloud.com/img/upload.php （支持 https）
-// DigitalOcean VPS: //sbi.ccloli.com/img/upload.php （支持 https，thanks to Retaker）
-// 注意，部分服务器可能仅支持 http 协议，若您选择了这些服务器，请务必注明 "http://"，且若您使用的是 Firefox 浏览器，在 https 页面下将不能上传文件搜索搜索（除非设置 security.mixed_content.block_active_content 为 false）
-
+var upload_servers={
+	"Heroku":{
+		"url":"search-by-image.herokuapp.com/img/upload.php",
+		"https":true
+	},
+	"BeGet":{
+		"url":"fh13121a.bget.ru/img/upload.php",
+		"https":false
+	},
+	"OpenShift":{
+		"url":"searchbyimage-864907600cc.rhcloud.com/img/upload.php",
+		"https":true
+	}
+};
+var server_option={
+	"header": "//" , // 设置上传服务器之协议，可选择 "//"（按照当前页面之设定）、"https://"（强制 https）、"http://"（强制 http）
+	"server": "Heroku" // 可在 upload_servers 里选择。注意：如果这里选择不支持 https 的服务器，请务必在上面的 header 填写 "http://"，且若您使用的是 Firefox 浏览器，在 https 页面下将不能上传文件搜索（除非设置 security.mixed_content.block_active_content 为 false）
+};
 var search_panel=null;
 var setting=GM_getValue('setting')?JSON.parse(GM_getValue('setting')):default_setting;
 var disable_contextmenu=false;
@@ -64,6 +68,7 @@ var img_src=null;
 var data_version=GM_getValue('version',0);
 var last_update=GM_getValue('timestamp',0);
 var xhr=new XMLHttpRequest();
+var server_url=server_option.header+upload_servers[server_option.server].url;
 var reader=new FileReader();
 reader.onload=function(file){upload_file(this.result);};
 
@@ -122,22 +127,6 @@ function create_panel(){
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop='-24px';
 		}
 	};
-	if(navigator.userAgent.indexOf('Firefox')>=0){
-		var paste_node_firefox=document.createElement('div');
-		paste_node_firefox.setAttribute('contenteditable','true');
-		paste_node_firefox.className='image-search-paste-node-firefox';
-		paste_node_firefox.style.cssText='width:0!important;height:0!important;position:absolute;overflow:hidden';
-		paste_node_firefox.addEventListener('paste',function(event){
-			setTimeout(function(){
-				var _images=paste_node_firefox.getElementsByTagName('img');
-				if(_images.length>0){
-					var _img_src=_images[_images.length-1].src;
-					if(_img_src.match(/^data:.*?;base64,/))upload_file(_img_src);
-				}
-			},500);
-		},false);
-		search_top.appendChild(paste_node_firefox);
-	}
 }
 
 function call_setting(){
@@ -287,11 +276,7 @@ document.addEventListener('mousedown',function(event){ // In order to fix a bug 
 		}
 		else{
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop='-24px';
-			if(navigator.userAgent.indexOf('Firefox')>=0){
-				document.getElementsByClassName('image-search-paste-node-firefox')[0].innerHTML='';
-				document.getElementsByClassName('image-search-paste-node-firefox')[0].focus();
-			}
-			else document.addEventListener('paste',get_clipboard,false);
+			document.addEventListener('paste',get_clipboard,false);
 		}
 	}
 	else{
