@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.3
+// @version     1.4.4
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -260,7 +260,7 @@ function hide_panel(){
 
 document.addEventListener('mousedown',function(event){ // In order to fix a bug on Chrome Tampermonkey
 //document.onmousedown=function(event){ 
-	console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
+	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
 	if(disable_contextmenu==true){
 		document.oncontextmenu=null;
 		disable_contextmenu=false;
@@ -294,8 +294,8 @@ document.addEventListener('mousedown',function(event){ // In order to fix a bug 
 			else document.addEventListener('paste',get_clipboard,false);
 		}
 	}
-	else{
-		if(search_panel!=null&&(event.target.compareDocumentPosition(search_panel)==10||event.target.compareDocumentPosition(search_panel)==0)){
+	else if(search_panel!=null){
+		if(event.target.compareDocumentPosition(search_panel)==10||event.target.compareDocumentPosition(search_panel)==0){
 			if(event.target.className=='image-search-item'&&event.button==0){
 				switch(event.target.getAttribute('search-option')){
 					case 'all':
@@ -321,4 +321,4 @@ document.addEventListener('mousedown',function(event){ // In order to fix a bug 
 	}
 },false);
 
-GM_registerMenuCommand('Search By Image Setting',call_setting);
+var gm_callsetting=GM_registerMenuCommand('Search By Image Setting',call_setting);
