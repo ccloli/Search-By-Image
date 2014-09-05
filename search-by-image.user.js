@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.4
+// @version     1.4.5
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -79,7 +79,7 @@ function create_panel(){
 	var search_top=document.createElement('div');
 	search_top.style.cssText='width:90%;height:24px;line-height:24px;font-size:12px;overflow:hidden;margin:0 auto';
 	search_top.className='image-search-top';
-	search_top.innerHTML='<div class="search_top_url" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:100%;height:24px"></div><div class="search_top_file" style="width:100%;height:24px;line-height:24px" draggable="true"><label for="image-search-file">上传图片并搜索</label><input type="file" id="image-search-file" accept="image/*" style="width:0px;height:0px;max-height:0px;max-width:0px;margin:0;padding:0"></div><div class="search_top_progress"><progress style="width:100%;height:16px;vertical-align:middle;margin:4px 0" max="1"></progerss></div>'
+	search_top.innerHTML='<div class="search_top_url" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:100%;height:24px"></div><div class="search_top_file" style="width:100%;height:24px;line-height:24px" draggable="true"><label for="image-search-file">上传图片并搜索</label><input type="file" id="image-search-file" accept="image/*" style="width:0px;height:0px;max-height:0px;max-width:0px;margin:0;padding:0"></div><div class="search_top_progress"><progress style="width:100%;height:16px;vertical-align:middle;margin:4px 0" max="1"></progerss></div><style>.image-search-item{color:#000000;transition:all 0.2s linear;-webkit-transition:all 0.2s linear}.image-search-item::hover{color:#5B97FF;background:#EEEEEE}';
 	search_panel.appendChild(search_top);
 	var search_item=document.createElement('div');
 	search_item.style.cssText='width:100%;height:24px;line-height:24px;cursor:pointer';
