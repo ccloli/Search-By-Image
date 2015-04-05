@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.5
+// @version     1.4.6
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -28,20 +28,20 @@
 'use strict';
 var default_setting = {
 	"site_list": {
-		"Google": "https://www.google.com/searchbyimage?image_url={%s}", 
-		"Baidu ShiTu": "http://stu.baidu.com/i?ct=1&tn=baiduimage&objurl={%s}", 
-		"Baidu Image": "http://image.baidu.com/i?rainbow=1&ct=1&tn=shituresultpc&objurl={%s}", 
-		"Bing": "http://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}", 
-		"TinEye": "http://www.tineye.com/search?url={%s}", 
-		//"Cydral": "http://www.cydral.com/#url={%s}", 
-		"Яндекс (Yandex)": "http://yandex.ru/images/search?rpt=imageview&img_url={%s}", 
-		"Sogou": "http://pic.sogou.com/ris?query={%s}", 
-		"360 ShiTu": "http://st.so.com/stu?imgurl={%s}", 
-		"SauceNAO": "http://saucenao.com/search.php?db=999&url={%s}", 
-		"IQDB": "http://iqdb.org/?url={%s}", 
+		"Google": "https://www.google.com/searchbyimage?image_url={%s}",
+		"Baidu ShiTu": "http://stu.baidu.com/i?ct=1&tn=baiduimage&objurl={%s}",
+		"Baidu Image": "http://image.baidu.com/i?rainbow=1&ct=1&tn=shituresultpc&objurl={%s}",
+		"Bing": "http://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}",
+		"TinEye": "http://www.tineye.com/search?url={%s}",
+		//"Cydral": "http://www.cydral.com/#url={%s}",
+		"Yandex": "http://yandex.ru/images/search?rpt=imageview&img_url={%s}", // change "Яндекс (Yandex)" to "Yandex"
+		"Sogou": "http://pic.sogou.com/ris?query={%s}",
+		"360 ShiTu": "http://st.so.com/stu?imgurl={%s}",
+		"SauceNAO": "http://saucenao.com/search.php?db=999&url={%s}",
+		"IQDB": "http://iqdb.org/?url={%s}",
 		"3D IQDB": "http://3d.iqdb.org/?url={%s}"
-	}, 
-	"site_option": ["Google", "Baidu ShiTu", "Baidu Image", "Bing", "TinEye", "Яндекс (Yandex)", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB"], 
+	},
+	"site_option": ["Google", "Baidu ShiTu", "Baidu Image", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB"],
 	"hot_key": "ctrlKey"
 };
 
@@ -80,9 +80,9 @@ function create_panel() {
 	search_panel.style.cssText = 'width: 198px; font-size: 14px; text-align: center; position: absolute; color: #000; z-index: 9999999999; box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5); border: 1px solid #CCC; background: rgba(255, 255, 255, 0.9); border-top-right-radius: 2px; border-bottom-left-radius: 2px; font-family: "Arial"; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;';
 	document.body.appendChild(search_panel);
 	var search_top = document.createElement('div');
-	search_top.style.cssText = 'width: 90%; height: 24px; line-height: 24px; font-size: 12px; overflow: hidden; margin: 0 auto;';
+	search_top.style.cssText = 'height: 24px; line-height: 24px; font-size: 12px; overflow: hidden; margin: 0 auto; padding: 0 5px;';
 	search_top.className = 'image-search-top';
-	search_top.innerHTML = '<div class="search_top_url" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 100%; height: 24px;"></div><div class="search_top_file" style="width: 100%; height: 24px; line-height: 24px;" draggable="true"><label for="image-search-file">上传图片并搜索</label><input type="file" id="image-search-file" accept="image/*" style="width: 0px; height: 0px; max-height: 0px; max-width: 0px; margin: 0; padding: 0;"></div><div class="search_top_progress"><progress style="width: 100%; height: 16px; vertical-align: middle; margin: 4px 0;" max="1"></progerss></div><style>.image-search-item{color: #000000; transition: all 0.2s linear; -webkit-transition: all 0.2s linear;}.image-search-item::hover{color: #5B97FF; background: #EEEEEE;}';
+	search_top.innerHTML = '<div class="search_top_url" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 100%; height: 24px;"></div><div class="search_top_file" style="width: 100%; height: 24px; line-height: 24px;" draggable="true"><label for="image-search-file">上传图片并搜索</label><input type="file" id="image-search-file" accept="image/*" style="width: 0px; height: 0px; max-height: 0px; max-width: 0px; margin: 0; padding: 0;"></div><div class="search_top_progress"><progress style="width: 100%; height: 16px; vertical-align: middle; margin: 4px 0;" max="1"></progerss></div><style>.image-search-item{color: #000000; transition: all 0.2s linear; -webkit-transition: all 0.1s linear;}.image-search-item:hover{background: #eeeeee;}</style>';
 	search_panel.appendChild(search_top);
 	var search_item = document.createElement('div');
 	search_item.style.cssText = 'width: 100%; height: 24px; line-height: 24px; cursor: pointer;';
@@ -291,9 +291,13 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 			search_panel.outerHTML = '';
 			setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
 			create_panel();
-		} else search_panel.style.display = 'block';
-		search_panel.style.left = (document.documentElement.clientWidth + document.body.scrollLeft - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
+		}
+		else search_panel.style.display = 'block';
+		search_panel.style.left = (document.documentElement.offsetWidth + (document.documentElement.scrollLeft || document.body.scrollLeft) - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
 		search_panel.style.top = (document.documentElement.scrollHeight - event.pageY >= search_panel.scrollHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.scrollHeight : 0) + 'px';
+		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328. 
+		search_panel.style.marginLeft = '-' + (navigator.userAgent.indexOf('Firefox') < 0 ? getComputedStyle(document.body).marginLeft : (document.documentElement.offsetWidth - document.body.offsetWidth) / 2 + 'px');
+		search_panel.style.marginTop = '-' + getComputedStyle(document.body).marginTop;
 		disable_contextmenu = true;
 		//for(var i=0; i<setting.site_option.length; i++)GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(event.target.src)));
 		document.oncontextmenu = function() {
