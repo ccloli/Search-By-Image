@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.6
+// @version     1.4.7
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -273,7 +273,8 @@ function get_clipboard(event) {
 
 function hide_panel() {
 	img_src = null;
-	search_panel.style.display = 'none';
+	//search_panel.style.display = 'none';
+	search_panel.parentElement.removeChild(search_panel); // Remove search panel to fix the bug that it may be left in some WYSIWYG editor (eg. MDN WYSIWYG editor). See issue: http://tieba.baidu.com/p/3682475061
 	document.removeEventListener('paste', get_clipboard, false);
 }
 
@@ -292,7 +293,7 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 			setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
 			create_panel();
 		}
-		else search_panel.style.display = 'block';
+		else document.body.appendChild(search_panel);//search_panel.style.display = 'block';
 		search_panel.style.left = (document.documentElement.offsetWidth + (document.documentElement.scrollLeft || document.body.scrollLeft) - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
 		search_panel.style.top = (document.documentElement.scrollHeight - event.pageY >= search_panel.scrollHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.scrollHeight : 0) + 'px';
 		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328. 

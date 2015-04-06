@@ -73,6 +73,8 @@ Search By Image | 以图搜图
 > 另外，搜索贴吧内图片时，如果出现搜索的 url 为 base64 的情况，请看此贴：http://tieba.baidu.com/p/3145502558
 
 更新历史： 
+> 2015.04.06 1.4.7 修复在部分可视化编辑器（eg. MDN WYSIWYG editor）中出现遗留菜单的 bug（Thanks to lychichem, see issue http://tieba.baidu.com/p/3682475061 ）
+
 > 2015.04.05 1.4.6 修复当 body 存在 margin 时菜单栏错位的问题，修复上一版本鼠标经过样式并未生效的问题，Яндекс (Yandex) 的默认名称改为 Yandex
 
 > 2014.09.05 1.4.5 添加鼠标经过选项之样式（我承认我懒了 OTL）
