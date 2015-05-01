@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.7
+// @version     1.4.8
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -30,7 +30,7 @@ var default_setting = {
 	"site_list": {
 		"Google": "https://www.google.com/searchbyimage?image_url={%s}",
 		"Baidu ShiTu": "http://stu.baidu.com/i?ct=1&tn=baiduimage&objurl={%s}",
-		"Baidu Image": "http://image.baidu.com/i?rainbow=1&ct=1&tn=shituresultpc&objurl={%s}",
+		"Baidu Image": "http://image.baidu.com/n/pc_search?queryImageUrl={%s}",//"http://image.baidu.com/i?rainbow=1&ct=1&tn=shituresultpc&objurl={%s}",
 		"Bing": "http://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}",
 		"TinEye": "http://www.tineye.com/search?url={%s}",
 		//"Cydral": "http://www.cydral.com/#url={%s}",
@@ -52,10 +52,10 @@ var server_url = "//sbi.ccloli.com/img/upload.php";
 // 地址前使用"https://"表示强制使用 https（需确认服务器支持 ssl）
 // 如果需要自己架设上传服务器的话请访问 GitHub 项目页（https://github.com/ccloli/Search-By-Image）获取服务端
 // 其他可用的上传服务器如下：
-// Heroku://search-by-image.herokuapp.com/img/upload.php （支持 https）
+// Heroku: //search-by-image.herokuapp.com/img/upload.php （支持 https）
 // BeGet: http://fh13121a.bget.ru/img/upload.php （不支持 https）
-// OpenShift://searchbyimage-864907600cc.rhcloud.com/img/upload.php （支持 https）
-// DigitalOcean VPS://sbi.ccloli.com/img/upload.php （支持 https，thanks to Retaker）
+// OpenShift: //searchbyimage-864907600cc.rhcloud.com/img/upload.php （支持 https）
+// DigitalOcean VPS: //sbi.ccloli.com/img/upload.php （支持 https，thanks to Retaker）
 // 注意，部分服务器可能仅支持 http 协议，若您选择了这些服务器，请务必注明 "http://"，且若您使用的是 Firefox 浏览器，在 https 页面下将不能上传文件搜索搜索（除非设置 security.mixed_content.block_active_content 为 false）
 
 var search_panel = null;
@@ -69,6 +69,15 @@ var reader = new FileReader();
 reader.onload = function(file) {
 	upload_file(this.result);
 };
+
+if (data_version < 3) {
+	if (setting.site_list['Baidu Image'] && setting.site_list['Baidu Image'] !== default_setting.site_list['Baidu Image']) {
+		setting.site_list['Baidu Image'] = default_setting.site_list['Baidu Image'];
+		set_setting(setting);
+		//console.log('Replaced!');
+	}
+	GM_setValue('version', data_version = 3);
+}
 
 function set_setting(data) {
 	GM_setValue('setting', JSON.stringify(data));
