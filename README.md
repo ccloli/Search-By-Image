@@ -73,7 +73,7 @@ Search By Image | 以图搜图
 > 另外，搜索贴吧内图片时，如果出现搜索的 url 为 base64 的情况，请看此贴：http://tieba.baidu.com/p/3145502558
 
 更新历史： 
-> 2015.04.06 1.4.8 修复百度图片搜索不可用的问题（See issue #3 ）
+> 2015.05.01 1.4.8 修复百度图片搜索不可用的问题（See issue #3 ）
 
 > 2015.04.06 1.4.7 修复在部分可视化编辑器（eg. MDN WYSIWYG editor）中出现遗留菜单的 bug（Thanks to lychichem, see issue http://tieba.baidu.com/p/3682475061 ）
 
