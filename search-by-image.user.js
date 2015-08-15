@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.8
+// @version     1.4.9
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -42,11 +42,12 @@ var default_setting = {
 		"3D IQDB": "http://3d.iqdb.org/?url={%s}"
 	},
 	"site_option": ["Google", "Baidu ShiTu", "Baidu Image", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB"],
-	"hot_key": "ctrlKey"
+	"hot_key": "ctrlKey",
+	"server_url": "//sbi.ccloli.com/img/upload.php"
 };
 
-var server_url = "//sbi.ccloli.com/img/upload.php";
-// 在此处直接输入完整的上传页面的地址（Firefox 请尽量选择支持 https 的服务器）
+/*var server_url = "//sbi.ccloli.com/img/upload.php";*/
+// 请直接在设置页进行设置（Firefox 请尽量选择支持 https 的服务器） /* 在此处直接输入完整的上传页面的地址*/
 // 地址前使用"//"表示按照当前页面设定决定是否使用 https
 // 地址前使用"http://"表示强制使用 http
 // 地址前使用"https://"表示强制使用 https（需确认服务器支持 ssl）
@@ -70,6 +71,45 @@ reader.onload = function(file) {
 	upload_file(this.result);
 };
 
+var i18n = {
+	'zh': {
+		'u2s': '上传图片并搜索',
+		'dh': '拖拽文件至此',
+		'ca': '确认终止上传文件吗？',
+		'a': '多搜',
+		'n': '名称',
+		'l': '地址（图片地址以 {%s} 代替）',
+		'cr': '确定将所有设置初始化么？\n(初始化将清除所有所有设置，且不可逆)',
+		'us': '上传完成！',
+		'uf': '上传失败！',
+		'sh': '热键',
+		'sa': '添加',
+		'sr': '重置',
+		'ss': '保存',
+		'sc': '取消'
+	},
+	'default': {
+		'u2s': 'Upload image to search',
+		'dh': 'Drag file to here',
+		'ca': 'Are you sure to cancel uploading?',
+		'a': 'All',
+		'n': 'Name',
+		'l': 'Location (Image URL should be replace with {%s})',
+		'cr': 'Are you sure to reset all preferences (irreversible) ?',
+		'us': 'Upload finished!',
+		'uf': 'Upload failed!',
+		'sh': 'Hot Key',
+		'sa': 'Add',
+		'sr': 'Reset',
+		'ss': 'Save',
+		'sc': 'Cancel'
+	}
+}
+var lang = i18n[navigator.language] ? navigator.language : navigator.languages.filter(function(elem){
+	return i18n[elem];
+})[0];
+if (lang == null) lang = 'default';
+
 if (data_version < 3) {
 	if (setting.site_list['Baidu Image'] && setting.site_list['Baidu Image'] !== default_setting.site_list['Baidu Image']) {
 		setting.site_list['Baidu Image'] = default_setting.site_list['Baidu Image'];
@@ -78,6 +118,13 @@ if (data_version < 3) {
 	}
 	GM_setValue('version', data_version = 3);
 }
+
+if (setting.server_url == null || setting.server_url == '') {
+	setting.server_url = default_setting.server_url;
+	set_setting(setting);
+}
+
+var server_url = setting.server_url;
 
 function set_setting(data) {
 	GM_setValue('setting', JSON.stringify(data));
@@ -91,7 +138,7 @@ function create_panel() {
 	var search_top = document.createElement('div');
 	search_top.style.cssText = 'height: 24px; line-height: 24px; font-size: 12px; overflow: hidden; margin: 0 auto; padding: 0 5px;';
 	search_top.className = 'image-search-top';
-	search_top.innerHTML = '<div class="search_top_url" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 100%; height: 24px;"></div><div class="search_top_file" style="width: 100%; height: 24px; line-height: 24px;" draggable="true"><label for="image-search-file">上传图片并搜索</label><input type="file" id="image-search-file" accept="image/*" style="width: 0px; height: 0px; max-height: 0px; max-width: 0px; margin: 0; padding: 0;"></div><div class="search_top_progress"><progress style="width: 100%; height: 16px; vertical-align: middle; margin: 4px 0;" max="1"></progerss></div><style>.image-search-item{color: #000000; transition: all 0.2s linear; -webkit-transition: all 0.1s linear;}.image-search-item:hover{background: #eeeeee;}</style>';
+	search_top.innerHTML = '<div class="search_top_url" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 100%; height: 24px;"></div><div class="search_top_file" style="width: 100%; height: 24px; line-height: 24px;" draggable="true"><label for="image-search-file">' + i18n[lang]['u2s'] + '</label><input type="file" id="image-search-file" accept="image/*" style="width: 0px; height: 0px; max-height: 0px; max-width: 0px; margin: 0; padding: 0;"></div><div class="search_top_progress"><progress style="width: 100%; height: 16px; vertical-align: middle; margin: 4px 0;" max="1"></progerss></div><style>.image-search-item{color: #000000; transition: all 0.2s linear; -webkit-transition: all 0.1s linear;}.image-search-item:hover{background: #eeeeee;}</style>';
 	search_panel.appendChild(search_top);
 	var search_item = document.createElement('div');
 	search_item.style.cssText = 'width: 100%; height: 24px; line-height: 24px; cursor: pointer;';
@@ -114,14 +161,14 @@ function create_panel() {
 	};
 	search_panel.ondragenter = function(event) {
 		event.preventDefault();
-		search_top.getElementsByTagName('label')[0].textContent = '拖拽文件至此';
+		search_top.getElementsByTagName('label')[0].textContent = i18n[lang]['dh'];
 	};
 	search_panel.ondragleave = function(event) {
 		event.preventDefault();
-		search_top.getElementsByTagName('label')[0].textContent = '上传图片并搜索';
+		search_top.getElementsByTagName('label')[0].textContent = i18n[lang]['u2s'];
 	};
 	search_panel.ondragover = function(event) {
-		search_top.getElementsByTagName('label')[0].textContent = '拖拽文件至此';
+		search_top.getElementsByTagName('label')[0].textContent = i18n[lang]['dh'];
 		event.preventDefault();
 	};
 	search_panel.ondrop = function(event) {
@@ -131,7 +178,7 @@ function create_panel() {
 		if (files[files.length - 1].type.indexOf('image') >= 0) reader.readAsDataURL(files[files.length - 1]);
 	};
 	search_top.getElementsByTagName('progress')[0].onclick = function() {
-		if (xhr.readyState != 0 && confirm('确认终止上传文件吗？') == true) {
+		if (xhr.readyState != 0 && confirm(i18n[lang]['ca']) == true) {
 			xhr.abort();
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '-24px';
 		}
@@ -166,7 +213,7 @@ function call_setting() {
 	var setting_item = document.createElement('div');
 	setting_item.style.cssText = 'width: 100%; height: 24px; line-height: 24px; margin: 1px 0;';
 	setting_item.className = 'image-search-setting-title';
-	setting_item.innerHTML = '<div style="text-align: center; display: inline-block; width: 30px;">多搜</div><div style="width: 100px; text-align: center; display: inline-block;">名称</div><div style="width: 350px; text-align: center; display: inline-block;">地址（图片地址以 {%s} 代替）</div><div style="width: 20px; display: inline-block;"></div>';
+	setting_item.innerHTML = '<div style="text-align: center; display: inline-block; width: 30px;">' + i18n[lang]['a'] + '</div><div style="width: 100px; text-align: center; display: inline-block;">' + i18n[lang]['n'] + '</div><div style="width: 350px; text-align: center; display: inline-block;">' + i18n[lang]['l'] + '</div><div style="width: 20px; display: inline-block;"></div>';
 	setting_panel.appendChild(setting_item);
 	for (var i in setting.site_list) {
 		var setting_item_child = setting_item.cloneNode(true);
@@ -177,6 +224,10 @@ function call_setting() {
 			this.parentElement.outerHTML = '';
 		};
 	}
+	var setting_server = document.createElement('div');
+	setting_server.className = 'image-search-setting-server';
+	setting_server.innerHTML = 'Upload Server <input type="text" value="' + setting['server_url'] + '" placeholder="//sbi.ccloli.com/img/upload.php" style="width: 350px;">';
+	setting_panel.appendChild(setting_server);
 	var setting_footer = document.createElement('div');
 	setting_footer.style.cssText = 'width: 100%; height: 32px; line-height: 32px; margin-top: 5px; text-align: right;';
 	setting_footer.className = 'image-search-setting-footer';
@@ -191,11 +242,11 @@ function call_setting() {
 	setting_reset.style.cssText = 'width: 90px; height: 32px; background: #666; color: #FFF; display: inline-block; text-align: center; cursor: pointer;';
 	setting_save.style.cssText = 'width: 90px; height: 32px; margin: 0 5px; background: #666; color: #FFF; display: inline-block; text-align: center; cursor: pointer;';
 	setting_cancel.style.cssText = 'width: 90px; height: 32px; background: #666; color: #FFF; display: inline-block; text-align: center; cursor: pointer;';
-	setting_add.textContent = 'Add Item';
-	setting_reset.textContent = 'Reset';
-	setting_save.textContent = 'Save';
-	setting_cancel.textContent = 'Cancel';
-	setting_hotkey.innerHTML = 'Hot Key <select><option value="ctrlKey"' + (setting.hot_key == 'ctrlKey' ? ' selected' : '') + '>Ctrl</option><option value="shiftKey"' + (setting.hot_key == 'shiftKey' ? ' selected' : '') + '>Shift</option><option value="altKey"' + (setting.hot_key == 'altKey' ? ' selected' : '') + '>Alt</option></select>';
+	setting_add.textContent = i18n[lang]['sa'];
+	setting_reset.textContent = i18n[lang]['sr'];
+	setting_save.textContent = i18n[lang]['ss'];
+	setting_cancel.textContent = i18n[lang]['sc'];
+	setting_hotkey.innerHTML = i18n[lang]['sh'] + ' <select><option value="ctrlKey"' + (setting.hot_key == 'ctrlKey' ? ' selected' : '') + '>Ctrl</option><option value="shiftKey"' + (setting.hot_key == 'shiftKey' ? ' selected' : '') + '>Shift</option><option value="altKey"' + (setting.hot_key == 'altKey' ? ' selected' : '') + '>Alt</option></select>';
 	setting_footer.appendChild(setting_hotkey);
 	setting_footer.appendChild(setting_add);
 	setting_footer.appendChild(setting_reset);
@@ -212,7 +263,7 @@ function call_setting() {
 		setting_panel.scrollTop = setting_panel.scrollHeight;
 	};
 	setting_reset.onclick = function() {
-		if (confirm('确定将所有设置初始化么？\n\n(初始化将清除所有所有设置，且不可逆)') == true) {
+		if (confirm(i18n[lang]['cr']) == true) {
 			setting = default_setting;
 			set_setting(setting);
 			setting_panel.outerHTML = '';
@@ -228,7 +279,8 @@ function call_setting() {
 		var setting_data = {
 			"site_list": {}, 
 			"site_option": [], 
-			"hot_key": null
+			"hot_key": null,
+			"server_url": null
 		};
 		for (var i = 0; i < setting_items.length; i++) {
 			if (setting_items[i].getElementsByTagName('input')[1].value != '') {
@@ -237,8 +289,13 @@ function call_setting() {
 			}
 		}
 		setting_data.hot_key = setting_hotkey.getElementsByTagName('select')[0].value;
-		console.log(setting_data);
+		setting_data.server_url = document.getElementsByClassName('image-search-setting-server')[0].getElementsByTagName('input')[0].value;
+		if (setting_data.server_url == null || setting_data.server_url == '') {
+			setting_data.server_url = default_setting.server_url;
+		}
 		setting = setting_data;
+		server_url = setting.server_url;
+		console.log(setting_data);
 		set_setting(setting);
 		setting_panel.outerHTML = '';
 		if (search_panel != null) {
@@ -258,7 +315,7 @@ function upload_file(data) {
 			if (xhr.status == 200) {
 				img_src = xhr.responseText;
 				search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '0px';
-				search_panel.getElementsByClassName('search_top_url')[0].textContent = '上传完成！';
+				search_panel.getElementsByClassName('search_top_url')[0].textContent = i18n[lang]['us'];
 			}
 		}
 	};
@@ -266,7 +323,7 @@ function upload_file(data) {
 		search_panel.getElementsByTagName('progress')[0].value = event.loaded / event.total;
 	};
 	xhr.onerror = function() {
-		alert('上传失败！');
+		alert(i18n[lang]['uf']);
 	};
 	var form = new FormData();
 	xhr.open('POST', server_url);
@@ -289,7 +346,7 @@ function hide_panel() {
 
 document.addEventListener('mousedown', function(event) { // In order to fix a bug on Chrome Tampermonkey
 	//document.onmousedown=function(event){ 
-	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
+	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target:'+event.target+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
 	if (disable_contextmenu == true) {
 		document.oncontextmenu = null;
 		disable_contextmenu = false;
@@ -306,8 +363,8 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 		search_panel.style.left = (document.documentElement.offsetWidth + (document.documentElement.scrollLeft || document.body.scrollLeft) - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
 		search_panel.style.top = (document.documentElement.scrollHeight - event.pageY >= search_panel.scrollHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.scrollHeight : 0) + 'px';
 		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328. 
-		search_panel.style.marginLeft = '-' + (navigator.userAgent.indexOf('Firefox') < 0 ? getComputedStyle(document.body).marginLeft : (document.documentElement.offsetWidth - document.body.offsetWidth) / 2 + 'px');
-		search_panel.style.marginTop = '-' + getComputedStyle(document.body).marginTop;
+		//search_panel.style.marginLeft = '-' + (navigator.userAgent.indexOf('Firefox') < 0 ? getComputedStyle(document.body).marginLeft : (document.documentElement.offsetWidth - document.body.offsetWidth) / 2 + 'px');
+		//search_panel.style.marginTop = '-' + getComputedStyle(document.body).marginTop;
 		disable_contextmenu = true;
 		//for(var i=0; i<setting.site_option.length; i++)GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(event.target.src)));
 		document.oncontextmenu = function() {
@@ -316,7 +373,7 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 		if (event.target.tagName.toLowerCase() == 'img' && event.target.src != null) {
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '0px';
 			search_panel.getElementsByClassName('search_top_url')[0].textContent = event.target.src;
-			if (event.target.src.match(/^data: .*?; base64, /) != null) upload_file(event.target.src);
+			if (event.target.src.match(/^data:\s*.*?;\s*base64,\s*/) != null) upload_file(event.target.src);
 			else img_src = event.target.src;
 		} else {
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '-24px';
