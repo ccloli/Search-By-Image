@@ -73,16 +73,20 @@ Search By Image | 以图搜图
 > 另外，搜索贴吧内图片时，如果出现搜索的 url 为 base64 的情况，请看此贴：http://tieba.baidu.com/p/3145502558
 
 更新历史： 
+> 2015.12.02 1.4.10 Fixed GreasyFork feedback [#6806](https://greasyfork.org/en/forum/discussion/6806/x) (not working on old Firefox), update most of default search engines url to HTTPS
+> 
+> 2015.08.15 1.4.9 添加并没有什么用的多语言支持，添加并没有什么用的自定义上传服务器设定，修复 1.4.6 修复菜单栏错位导致菜单栏错位的问题
+> 
 > 2015.05.01 1.4.8 修复百度图片搜索不可用的问题（See issue #3 ）
-
+> 
 > 2015.04.06 1.4.7 修复在部分可视化编辑器（eg. MDN WYSIWYG editor）中出现遗留菜单的 bug（Thanks to lychichem, see issue http://tieba.baidu.com/p/3682475061 ）
-
+> 
 > 2015.04.05 1.4.6 修复当 body 存在 margin 时菜单栏错位的问题，修复上一版本鼠标经过样式并未生效的问题，Яндекс (Yandex) 的默认名称改为 Yandex
-
+> 
 > 2014.09.05 1.4.5 添加鼠标经过选项之样式（我承认我懒了 OTL）
-
+> 
 > 2014.08.14 1.4.4 修复未呼出面板时仍进行关闭面板的操作，尝试性修复 GM 2.x 下 GM_registerMenuCommand 冲突
-
+> 
 > 2014.07.26 1.4.3 添加中转上传服务器（Thanks to Retaker），修改上传服务器设置方式，尝试性修复 Firefox 无法粘贴上传的问题
 > 
 > 2014.07.18 1.4.2 修复在非图片上呼出搜索菜单时无法点击设置按钮的问题
