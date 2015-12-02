@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.9
+// @version     1.4.10
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -31,15 +31,15 @@ var default_setting = {
 		"Google": "https://www.google.com/searchbyimage?image_url={%s}",
 		"Baidu ShiTu": "http://stu.baidu.com/i?ct=1&tn=baiduimage&objurl={%s}",
 		"Baidu Image": "http://image.baidu.com/n/pc_search?queryImageUrl={%s}",//"http://image.baidu.com/i?rainbow=1&ct=1&tn=shituresultpc&objurl={%s}",
-		"Bing": "http://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}",
-		"TinEye": "http://www.tineye.com/search?url={%s}",
+		"Bing": "https://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}",
+		"TinEye": "https://www.tineye.com/search?url={%s}",
 		//"Cydral": "http://www.cydral.com/#url={%s}",
-		"Yandex": "http://yandex.ru/images/search?rpt=imageview&img_url={%s}", // change "Яндекс (Yandex)" to "Yandex"
+		"Yandex": "https://yandex.ru/images/search?rpt=imageview&img_url={%s}", // change "Яндекс (Yandex)" to "Yandex"
 		"Sogou": "http://pic.sogou.com/ris?query={%s}",
 		"360 ShiTu": "http://st.so.com/stu?imgurl={%s}",
-		"SauceNAO": "http://saucenao.com/search.php?db=999&url={%s}",
-		"IQDB": "http://iqdb.org/?url={%s}",
-		"3D IQDB": "http://3d.iqdb.org/?url={%s}"
+		"SauceNAO": "https://saucenao.com/search.php?db=999&url={%s}",
+		"IQDB": "https://iqdb.org/?url={%s}",
+		"3D IQDB": "https://3d.iqdb.org/?url={%s}"
 	},
 	"site_option": ["Google", "Baidu ShiTu", "Baidu Image", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB"],
 	"hot_key": "ctrlKey",
@@ -104,10 +104,10 @@ var i18n = {
 		'ss': 'Save',
 		'sc': 'Cancel'
 	}
-}
-var lang = i18n[navigator.language] ? navigator.language : navigator.languages.filter(function(elem){
+};
+var lang = i18n[navigator.language] ? navigator.language : navigator.languages ? navigator.languages.filter(function(elem){
 	return i18n[elem];
-})[0];
+})[0] : null;
 if (lang == null) lang = 'default';
 
 if (data_version < 3) {
@@ -277,8 +277,8 @@ function call_setting() {
 	setting_save.onclick = function() {
 		var setting_items = document.getElementsByClassName('image-search-setting-item');
 		var setting_data = {
-			"site_list": {}, 
-			"site_option": [], 
+			"site_list": {},
+			"site_option": [],
 			"hot_key": null,
 			"server_url": null
 		};
@@ -345,7 +345,7 @@ function hide_panel() {
 }
 
 document.addEventListener('mousedown', function(event) { // In order to fix a bug on Chrome Tampermonkey
-	//document.onmousedown=function(event){ 
+	//document.onmousedown=function(event){
 	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target:'+event.target+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
 	if (disable_contextmenu == true) {
 		document.oncontextmenu = null;
@@ -362,7 +362,7 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 		else document.body.appendChild(search_panel);//search_panel.style.display = 'block';
 		search_panel.style.left = (document.documentElement.offsetWidth + (document.documentElement.scrollLeft || document.body.scrollLeft) - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
 		search_panel.style.top = (document.documentElement.scrollHeight - event.pageY >= search_panel.scrollHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.scrollHeight : 0) + 'px';
-		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328. 
+		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328.
 		//search_panel.style.marginLeft = '-' + (navigator.userAgent.indexOf('Firefox') < 0 ? getComputedStyle(document.body).marginLeft : (document.documentElement.offsetWidth - document.body.offsetWidth) / 2 + 'px');
 		//search_panel.style.marginTop = '-' + getComputedStyle(document.body).marginTop;
 		disable_contextmenu = true;
@@ -386,17 +386,17 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 		if (event.target.compareDocumentPosition(search_panel) == 10 || event.target.compareDocumentPosition(search_panel) == 0) {
 			if (event.target.className == 'image-search-item' && event.button == 0) {
 				switch (event.target.getAttribute('search-option')) {
-					case 'all': 
+					case 'all':
 						if (img_src != null) {
 							for (var i = setting.site_option.length - 1; i >= 0; i--) GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(img_src)));
 							hide_panel();
 						}
 						break;
-					case 'setting': 
+					case 'setting':
 						call_setting();
 						hide_panel();
 						break;
-					default: 
+					default:
 						if (img_src != null) {
 							GM_openInTab(setting.site_list[event.target.getAttribute('search-option')].replace(/\{%s\}/, encodeURIComponent(img_src)));
 							hide_panel();
