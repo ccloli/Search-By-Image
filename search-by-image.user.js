@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.10
+// @version     1.4.11
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -21,7 +21,7 @@
 // ==/UserScript==
 
 
-// 本脚本基于 GPLv3 协议开源 http://www.gnu.org/licenses/gpl.html‎
+// 本脚本基于 GPLv3 协议开源 http://www.gnu.org/licenses/gpl.html
 // (c) 86497600cc. Some Rights Reserved.
 // Default setting: Press Ctrl and click right key on a image to search.
 
@@ -30,7 +30,7 @@ var default_setting = {
 	"site_list": {
 		"Google": "https://www.google.com/searchbyimage?image_url={%s}",
 		"Baidu ShiTu": "http://stu.baidu.com/i?ct=1&tn=baiduimage&objurl={%s}",
-		"Baidu Image": "http://image.baidu.com/n/pc_search?queryImageUrl={%s}",//"http://image.baidu.com/i?rainbow=1&ct=1&tn=shituresultpc&objurl={%s}",
+		"Baidu Image": "http://image.baidu.com/n/pc_search?queryImageUrl={%s}",
 		"Bing": "https://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}",
 		"TinEye": "https://www.tineye.com/search?url={%s}",
 		//"Cydral": "http://www.cydral.com/#url={%s}",
@@ -47,7 +47,7 @@ var default_setting = {
 };
 
 /*var server_url = "//sbi.ccloli.com/img/upload.php";*/
-// 请直接在设置页进行设置（Firefox 请尽量选择支持 https 的服务器） /* 在此处直接输入完整的上传页面的地址*/
+// 请直接在设置页进行设置（Firefox 请尽量选择支持 https 的服务器）
 // 地址前使用"//"表示按照当前页面设定决定是否使用 https
 // 地址前使用"http://"表示强制使用 http
 // 地址前使用"https://"表示强制使用 https（需确认服务器支持 ssl）
@@ -114,7 +114,6 @@ if (data_version < 3) {
 	if (setting.site_list['Baidu Image'] && setting.site_list['Baidu Image'] !== default_setting.site_list['Baidu Image']) {
 		setting.site_list['Baidu Image'] = default_setting.site_list['Baidu Image'];
 		set_setting(setting);
-		//console.log('Replaced!');
 	}
 	GM_setValue('version', data_version = 3);
 }
@@ -268,7 +267,7 @@ function call_setting() {
 			set_setting(setting);
 			setting_panel.outerHTML = '';
 			if (search_panel != null) {
-				search_panel.outerHTML = '';
+				search_panel.parentElement.removeChild(search_panel);
 				search_panel = null;
 			}
 			call_setting();
@@ -299,7 +298,7 @@ function call_setting() {
 		set_setting(setting);
 		setting_panel.outerHTML = '';
 		if (search_panel != null) {
-			search_panel.outerHTML = '';
+			search_panel.parentElement.removeChild(search_panel);
 			search_panel = null;
 		}
 	};
@@ -338,14 +337,13 @@ function get_clipboard(event) {
 }
 
 function hide_panel() {
+	if (!search_panel || !search_panel.parentElement) return;
 	img_src = null;
-	//search_panel.style.display = 'none';
 	search_panel.parentElement.removeChild(search_panel); // Remove search panel to fix the bug that it may be left in some WYSIWYG editor (eg. MDN WYSIWYG editor). See issue: http://tieba.baidu.com/p/3682475061
 	document.removeEventListener('paste', get_clipboard, false);
 }
 
-document.addEventListener('mousedown', function(event) { // In order to fix a bug on Chrome Tampermonkey
-	//document.onmousedown=function(event){
+document.addEventListener('mousedown', function(event) {
 	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target:'+event.target+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
 	if (disable_contextmenu == true) {
 		document.oncontextmenu = null;
@@ -354,19 +352,18 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 	if (event[setting.hot_key] == true && event.button == 2) {
 		if (search_panel == null) create_panel();
 		else if (last_update != GM_getValue('timestamp', 0)) {
-			last_update = GM_getValue('timestamp', 0)
-			search_panel.outerHTML = '';
+			last_update = GM_getValue('timestamp', 0);
+			search_panel.parentElement.removeChild(search_panel);
 			setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
 			create_panel();
 		}
-		else document.body.appendChild(search_panel);//search_panel.style.display = 'block';
+		else document.body.appendChild(search_panel);
 		search_panel.style.left = (document.documentElement.offsetWidth + (document.documentElement.scrollLeft || document.body.scrollLeft) - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
-		search_panel.style.top = (document.documentElement.scrollHeight - event.pageY >= search_panel.scrollHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.scrollHeight : 0) + 'px';
+		search_panel.style.top = (event.pageY + search_panel.offsetHeight < (document.documentElement.scrollTop || document.body.scrollTop) + document.documentElement.clientHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.offsetHeight : 0) + 'px';
 		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328.
 		//search_panel.style.marginLeft = '-' + (navigator.userAgent.indexOf('Firefox') < 0 ? getComputedStyle(document.body).marginLeft : (document.documentElement.offsetWidth - document.body.offsetWidth) / 2 + 'px');
 		//search_panel.style.marginTop = '-' + getComputedStyle(document.body).marginTop;
 		disable_contextmenu = true;
-		//for(var i=0; i<setting.site_option.length; i++)GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(event.target.src)));
 		document.oncontextmenu = function() {
 			return false;
 		};
@@ -375,20 +372,23 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 			search_panel.getElementsByClassName('search_top_url')[0].textContent = event.target.src;
 			if (event.target.src.match(/^data:\s*.*?;\s*base64,\s*/) != null) upload_file(event.target.src);
 			else img_src = event.target.src;
-		} else {
+		}
+		else {
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '-24px';
 			if (navigator.userAgent.indexOf('Firefox') >= 0) {
 				document.getElementsByClassName('image-search-paste-node-firefox')[0].innerHTML = '';
 				document.getElementsByClassName('image-search-paste-node-firefox')[0].focus();
-			} else document.addEventListener('paste', get_clipboard, false);
+			}
+			else document.addEventListener('paste', get_clipboard, false);
 		}
-	} else if (search_panel != null) {
+	}
+	else if (search_panel != null) {
 		if (event.target.compareDocumentPosition(search_panel) == 10 || event.target.compareDocumentPosition(search_panel) == 0) {
 			if (event.target.className == 'image-search-item' && event.button == 0) {
 				switch (event.target.getAttribute('search-option')) {
 					case 'all':
 						if (img_src != null) {
-							for (var i = setting.site_option.length - 1; i >= 0; i--) GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(img_src)));
+							for (var i = setting.site_option.length - 1; i >= 0; i--) GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(img_src)), event[setting.hot_key]);
 							hide_panel();
 						}
 						break;
@@ -398,12 +398,14 @@ document.addEventListener('mousedown', function(event) { // In order to fix a bu
 						break;
 					default:
 						if (img_src != null) {
-							GM_openInTab(setting.site_list[event.target.getAttribute('search-option')].replace(/\{%s\}/, encodeURIComponent(img_src)));
+							GM_openInTab(setting.site_list[event.target.getAttribute('search-option')].replace(/\{%s\}/, encodeURIComponent(img_src)), event[setting.hot_key]);
 							hide_panel();
 						}
 				}
-			} else if (event.button != 0) hide_panel();
-		} else hide_panel();
+			}
+			else if (event.button != 0) hide_panel();
+		}
+		else hide_panel();
 	}
 }, false);
 

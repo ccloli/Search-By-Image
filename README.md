@@ -73,6 +73,8 @@ Search By Image | 以图搜图
 > 另外，搜索贴吧内图片时，如果出现搜索的 url 为 base64 的情况，请看此贴：http://tieba.baidu.com/p/3145502558
 
 更新历史： 
+> 2015.12.27 1.4.11 GreasyFork feedback [#7547](https://greasyfork.org/zh-CN/forum/discussion/7547/x) 搜索菜单在超出窗口可视大小时对其下边缘，按住热键时点击搜索菜单将在后台标签页打开，未按下时将在前台标签页打开
+>
 > 2015.12.02 1.4.10 Fixed GreasyFork feedback [#6806](https://greasyfork.org/en/forum/discussion/6806/x) (not working on old Firefox), update most of default search engines url to HTTPS
 > 
 > 2015.08.15 1.4.9 添加并没有什么用的多语言支持，添加并没有什么用的自定义上传服务器设定，修复 1.4.6 修复菜单栏错位导致菜单栏错位的问题
