@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.4.11
+// @version     1.5
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -29,19 +29,19 @@
 var default_setting = {
 	"site_list": {
 		"Google": "https://www.google.com/searchbyimage?image_url={%s}",
-		"Baidu ShiTu": "http://stu.baidu.com/i?ct=1&tn=baiduimage&objurl={%s}",
-		"Baidu Image": "http://image.baidu.com/n/pc_search?queryImageUrl={%s}",
-		"Bing": "https://cn.bing.com/images/searchbyimage?FORM=IRSBIQ&cbir=sbi&imgurl={%s}",
+		"Baidu": "https://image.baidu.com/n/pc_search?queryImageUrl={%s}&fm=result_camera&uptype=paste&drag=1",
+		"Bing": "https://www.bing.com/images/searchbyimage?cbir=sbi&iss=sbi&imgurl={%s}",
 		"TinEye": "https://www.tineye.com/search?url={%s}",
 		//"Cydral": "http://www.cydral.com/#url={%s}",
 		"Yandex": "https://yandex.ru/images/search?rpt=imageview&img_url={%s}", // change "Яндекс (Yandex)" to "Yandex"
-		"Sogou": "http://pic.sogou.com/ris?query={%s}",
+		"Sogou": "https://pic.sogou.com/ris?query={%s}&flag=1&drag=0",
 		"360 ShiTu": "http://st.so.com/stu?imgurl={%s}",
 		"SauceNAO": "https://saucenao.com/search.php?db=999&url={%s}",
 		"IQDB": "https://iqdb.org/?url={%s}",
-		"3D IQDB": "https://3d.iqdb.org/?url={%s}"
+		"3D IQDB": "https://3d.iqdb.org/?url={%s}",
+		"WhatAnime": "https://whatanime.ga/?url={%s}"
 	},
-	"site_option": ["Google", "Baidu ShiTu", "Baidu Image", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB"],
+	"site_option": ["Google", "Baidu", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB", "WhatAnime"],
 	"hot_key": "ctrlKey",
 	"server_url": "//sbi.ccloli.com/img/upload.php"
 };
@@ -88,7 +88,7 @@ var i18n = {
 		'ss': '保存',
 		'sc': '取消'
 	},
-	'default': {
+	'en': {
 		'u2s': 'Upload image to search',
 		'dh': 'Drag file to here',
 		'ca': 'Are you sure to cancel uploading?',
@@ -108,14 +108,46 @@ var i18n = {
 var lang = i18n[navigator.language] ? navigator.language : navigator.languages ? navigator.languages.filter(function(elem){
 	return i18n[elem];
 })[0] : null;
-if (lang == null) lang = 'default';
+if (lang == null) lang = 'en';
 
-if (data_version < 3) {
-	if (setting.site_list['Baidu Image'] && setting.site_list['Baidu Image'] !== default_setting.site_list['Baidu Image']) {
-		setting.site_list['Baidu Image'] = default_setting.site_list['Baidu Image'];
-		set_setting(setting);
+if (data_version < 4) {
+	var new_site_list = {};
+	var new_site_option = [];
+
+	for (var i in setting.site_list) {
+		// use for loop to keep order, will use array in 2.x
+		switch (i) {
+			case 'Baidu ShiTu':
+			case 'Baidu Image':
+				new_site_list['Baidu'] = default_setting.site_list['Baidu'];
+				break;
+
+			case 'Bing':
+			case 'Sogou':
+				new_site_list[i] = default_setting.site_list[i];
+				break;
+			
+			default:
+				new_site_list[i] = setting.site_list[i];
+		}
 	}
-	GM_setValue('version', data_version = 3);
+	new_site_list['WhatAnime'] = default_setting.site_list['WhatAnime'];
+
+	for (var i = 0; i < setting.site_option.length; i++) {
+		if ((setting.site_option[i] === 'Baidu ShiTu' || setting.site_option[i] === 'Baidu Image') && !(/,?Baidu,?/.test(new_site_option.join(',')))) {
+			new_site_option.push('Baidu');
+		}
+		else {
+			new_site_option.push(setting.site_option[i]);
+		}
+	}
+	new_site_option.push('WhatAnime');
+
+	setting.site_list = new_site_list;
+	setting.site_option = new_site_option;
+	
+	set_setting(setting);
+	GM_setValue('version', data_version = 4);
 }
 
 if (setting.server_url == null || setting.server_url == '') {
@@ -192,7 +224,7 @@ function create_panel() {
 				var _images = paste_node_firefox.getElementsByTagName('img');
 				if (_images.length > 0) {
 					var _img_src = _images[_images.length - 1].src;
-					if (_img_src.match(/^data: .*?; base64, /)) upload_file(_img_src);
+					if (_img_src.match(/^data:\s*.*?;\s*base64,\s*/)) upload_file(_img_src);
 				}
 			}, 500);
 		}, false);
@@ -407,6 +439,6 @@ document.addEventListener('mousedown', function(event) {
 		}
 		else hide_panel();
 	}
-}, false);
+}, true);
 
 var gm_callsetting = GM_registerMenuCommand('Search By Image Setting', call_setting);
