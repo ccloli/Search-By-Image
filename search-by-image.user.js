@@ -224,7 +224,7 @@ function create_panel() {
 				var _images = paste_node_firefox.getElementsByTagName('img');
 				if (_images.length > 0) {
 					var _img_src = _images[_images.length - 1].src;
-					if (_img_src.match(/^data:\s*.*?;\s*base64,\s*/)) upload_file(_img_src);
+					if (_img_src.match(/^data:[\s\S]+?;\s*?base64,/)) upload_file(_img_src);
 				}
 			}, 500);
 		}, false);
@@ -252,7 +252,8 @@ function call_setting() {
 		setting_item_child.innerHTML = '<div style="text-align: center; display: inline-block; width: 30px; vertical-align: middle;"><input type="checkbox"' + (setting.site_option.join('\n').indexOf(i) >= 0 ? ' checked="checked"' : '') + '></div><div style="width: 100px; text-align: center; display: inline-block;"><input style="width: 90px;" type="text" value="' + i + '"></div><div style="width: 350px; text-align: center; display: inline-block;"><input style="width: 340px;" type="text" value="' + setting.site_list[i] + '"></div><div style="text-align: center; display: inline-block; cursor: pointer; width: 20px;">×</div>';
 		setting_panel.appendChild(setting_item_child);
 		setting_item_child.getElementsByTagName('div')[3].onclick = function() {
-			this.parentElement.outerHTML = '';
+			var parent = this.parentElement;
+			parent.parentElement.removeChild(parent);
 		};
 	}
 	var setting_server = document.createElement('div');
@@ -289,7 +290,8 @@ function call_setting() {
 		setting_item_child.innerHTML = '<div style="text-align: center; display: inline-block; width: 30px; vertical-align: middle;"><input type="checkbox"></div><div style="width: 100px; text-align: center; display: inline-block;"><input style="width: 90px;" type="text"></div><div style="width: 350px; text-align: center; display: inline-block;"><input style="width: 340px;" type="text"></div><div style="text-align: center; display: inline-block; cursor: pointer; width: 20px;">×</div>';
 		setting_panel.insertBefore(setting_item_child, setting_footer);
 		setting_item_child.getElementsByTagName('div')[3].onclick = function() {
-			this.parentElement.outerHTML = '';
+			var parent = this.parentElement;
+			parent.parentElement.removeChild(parent);
 		};
 		setting_panel.scrollTop = setting_panel.scrollHeight;
 	};
@@ -299,7 +301,7 @@ function call_setting() {
 			set_setting(setting);
 			setting_panel.outerHTML = '';
 			if (search_panel != null) {
-				search_panel.parentElement.removeChild(search_panel);
+				search_panel.parentElement && search_panel.parentElement.removeChild(search_panel);
 				search_panel = null;
 			}
 			call_setting();
@@ -328,14 +330,14 @@ function call_setting() {
 		server_url = setting.server_url;
 		console.log(setting_data);
 		set_setting(setting);
-		setting_panel.outerHTML = '';
+		document.body.removeChild(setting_panel);
 		if (search_panel != null) {
-			search_panel.parentElement.removeChild(search_panel);
+			search_panel.parentElement && search_panel.parentElement.removeChild(search_panel);
 			search_panel = null;
 		}
 	};
 	setting_cancel.onclick = function() {
-		setting_panel.outerHTML = '';
+		document.body.removeChild(setting_panel);
 	};
 }
 
@@ -371,7 +373,7 @@ function get_clipboard(event) {
 function hide_panel() {
 	if (!search_panel || !search_panel.parentElement) return;
 	img_src = null;
-	search_panel.parentElement.removeChild(search_panel); // Remove search panel to fix the bug that it may be left in some WYSIWYG editor (eg. MDN WYSIWYG editor). See issue: http://tieba.baidu.com/p/3682475061
+	search_panel.parentElement && search_panel.parentElement.removeChild(search_panel); // Remove search panel to fix the bug that it may be left in some WYSIWYG editor (eg. MDN WYSIWYG editor). See issue: http://tieba.baidu.com/p/3682475061
 	document.removeEventListener('paste', get_clipboard, false);
 }
 
@@ -385,7 +387,7 @@ document.addEventListener('mousedown', function(event) {
 		if (search_panel == null) create_panel();
 		else if (last_update != GM_getValue('timestamp', 0)) {
 			last_update = GM_getValue('timestamp', 0);
-			search_panel.parentElement.removeChild(search_panel);
+			search_panel.parentElement && search_panel.parentElement.removeChild(search_panel);
 			setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
 			create_panel();
 		}
