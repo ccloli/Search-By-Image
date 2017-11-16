@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.5
+// @version     1.5.1
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -219,15 +219,7 @@ function create_panel() {
 		paste_node_firefox.setAttribute('contenteditable', 'true');
 		paste_node_firefox.className = 'image-search-paste-node-firefox';
 		paste_node_firefox.style.cssText = 'width: 0!important; height: 0!important; position: absolute; overflow: hidden;';
-		paste_node_firefox.addEventListener('paste', function(event) {
-			setTimeout(function() {
-				var _images = paste_node_firefox.getElementsByTagName('img');
-				if (_images.length > 0) {
-					var _img_src = _images[_images.length - 1].src;
-					if (_img_src.match(/^data:[\s\S]+?;\s*?base64,/)) upload_file(_img_src);
-				}
-			}, 500);
-		}, false);
+		paste_node_firefox.addEventListener('paste', get_clipboard, false);
 		search_top.appendChild(paste_node_firefox);
 	}
 }
@@ -409,9 +401,10 @@ document.addEventListener('mousedown', function(event) {
 		}
 		else {
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '-24px';
-			if (navigator.userAgent.indexOf('Firefox') >= 0) {
-				document.getElementsByClassName('image-search-paste-node-firefox')[0].innerHTML = '';
-				document.getElementsByClassName('image-search-paste-node-firefox')[0].focus();
+			var firefoxPasteNode = document.getElementsByClassName('image-search-paste-node-firefox')[0];
+			if (navigator.userAgent.indexOf('Firefox') >= 0 && firefoxPasteNode) {
+				firefoxPasteNode.innerHTML = '';
+				firefoxPasteNode.focus();
 			}
 			else document.addEventListener('paste', get_clipboard, false);
 		}
