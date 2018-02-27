@@ -1,12 +1,16 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.5.1
+// @version     1.6
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
 // @author      864907600cc
 // @icon        http://1.gravatar.com/avatar/147834caf9ccb0a66b2505c753747867
 // @run-at      document-start
+// @grant       GM.getValue
+// @grant       GM.setValue
+// @grant       GM.openInTab
+// @grant       GM.registerMenuCommand
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_openInTab
@@ -39,9 +43,10 @@ var default_setting = {
 		"SauceNAO": "https://saucenao.com/search.php?db=999&url={%s}",
 		"IQDB": "https://iqdb.org/?url={%s}",
 		"3D IQDB": "https://3d.iqdb.org/?url={%s}",
-		"WhatAnime": "https://whatanime.ga/?url={%s}"
+		"WhatAnime": "https://whatanime.ga/?url={%s}",
+		"Ascii2D": "https://ascii2d.net/search/url/{%s}"
 	},
-	"site_option": ["Google", "Baidu", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB", "WhatAnime"],
+	"site_option": ["Google", "Baidu", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB", "WhatAnime", "Ascii2D"],
 	"hot_key": "ctrlKey",
 	"server_url": "//sbi.ccloli.com/img/upload.php"
 };
@@ -60,16 +65,17 @@ var default_setting = {
 // 注意，部分服务器可能仅支持 http 协议，若您选择了这些服务器，请务必注明 "http://"，且若您使用的是 Firefox 浏览器，在 https 页面下将不能上传文件搜索搜索（除非设置 security.mixed_content.block_active_content 为 false）
 
 var search_panel = null;
-var setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
+var setting = default_setting;
 var disable_contextmenu = false;
 var img_src = null;
-var data_version = GM_getValue('version', 0);
-var last_update = GM_getValue('timestamp', 0);
+var data_version = 0;
+var last_update = 0;
 var xhr = new XMLHttpRequest();
 var reader = new FileReader();
 reader.onload = function(file) {
 	upload_file(this.result);
 };
+var asyncGMAPI = false;
 
 var i18n = {
 	'zh': {
@@ -110,49 +116,84 @@ var lang = i18n[navigator.language] ? navigator.language : navigator.languages ?
 })[0] : null;
 if (lang == null) lang = 'en';
 
-if (data_version < 4) {
-	var new_site_list = {};
-	var new_site_option = [];
-
-	for (var i in setting.site_list) {
-		// use for loop to keep order, will use array in 2.x
-		switch (i) {
-			case 'Baidu ShiTu':
-			case 'Baidu Image':
-				new_site_list['Baidu'] = default_setting.site_list['Baidu'];
-				break;
-
-			case 'Bing':
-			case 'Sogou':
-				new_site_list[i] = default_setting.site_list[i];
-				break;
-			
-			default:
-				new_site_list[i] = setting.site_list[i];
-		}
-	}
-	new_site_list['WhatAnime'] = default_setting.site_list['WhatAnime'];
-
-	for (var i = 0; i < setting.site_option.length; i++) {
-		if ((setting.site_option[i] === 'Baidu ShiTu' || setting.site_option[i] === 'Baidu Image') && !(/,?Baidu,?/.test(new_site_option.join(',')))) {
-			new_site_option.push('Baidu');
-		}
-		else {
-			new_site_option.push(setting.site_option[i]);
-		}
-	}
-	new_site_option.push('WhatAnime');
-
-	setting.site_list = new_site_list;
-	setting.site_option = new_site_option;
-	
-	set_setting(setting);
-	GM_setValue('version', data_version = 4);
+var getValue;
+if (typeof GM_getValue === 'undefined' && typeof GM !== 'undefined') {
+	self.GM_getValue = GM.getValue;
+	self.GM_setValue = GM.setValue;
+	self.GM_openInTab = GM.openInTab;
+	self.GM_registerMenuCommand = GM.registerMenuCommand;
+	getValue = GM.getValue;
+	asyncGMAPI = true;
+}
+else {
+	getValue = function(key, init) {
+		return new Promise(function(resolve, reject){
+			try {
+				resolve(GM_getValue(key, init));
+			}
+			catch(e) {
+				reject(e);
+			}
+		});
+	};
 }
 
-if (setting.server_url == null || setting.server_url == '') {
-	setting.server_url = default_setting.server_url;
-	set_setting(setting);
+function init() {
+	return Promise.all([getValue('setting'), GM_getValue('version', 0), GM_getValue('timestamp', 0)]).then(function(res) {
+		var s = res[0], v = res[1], t = res[2];
+		var setting = s ? JSON.parse(s) : default_setting;
+		var data_version = v;
+		var last_update = t;
+
+		if (data_version < 5) {
+			if (data_version < 4) {
+				var new_site_list = {};
+				var new_site_option = [];
+
+				for (var i in setting.site_list) {
+					// use for loop to keep order, will use array in 2.x
+					switch (i) {
+						case 'Baidu ShiTu':
+						case 'Baidu Image':
+							new_site_list['Baidu'] = default_setting.site_list['Baidu'];
+							break;
+
+						case 'Bing':
+						case 'Sogou':
+							new_site_list[i] = default_setting.site_list[i];
+							break;
+
+						default:
+							new_site_list[i] = setting.site_list[i];
+					}
+				}
+				new_site_list['WhatAnime'] = default_setting.site_list['WhatAnime'];
+
+				for (var i = 0; i < setting.site_option.length; i++) {
+					if ((setting.site_option[i] === 'Baidu ShiTu' || setting.site_option[i] === 'Baidu Image') && !(/,?Baidu,?/.test(new_site_option.join(',')))) {
+						new_site_option.push('Baidu');
+					}
+					else {
+						new_site_option.push(setting.site_option[i]);
+					}
+				}
+				new_site_option.push('WhatAnime');
+
+				setting.site_list = new_site_list;
+				setting.site_option = new_site_option;
+			}
+
+			setting.site_list['Ascii2D'] = default_setting.site_list['Ascii2D'];
+			setting.site_option.push('Ascii2D');
+			set_setting(setting);
+			GM_setValue('version', data_version = 5);
+		}
+
+		if (setting.server_url == null || setting.server_url == '') {
+			setting.server_url = default_setting.server_url;
+			set_setting(setting);
+		}
+	});
 }
 
 var server_url = setting.server_url;
@@ -377,13 +418,30 @@ document.addEventListener('mousedown', function(event) {
 	}
 	if (event[setting.hot_key] == true && event.button == 2) {
 		if (search_panel == null) create_panel();
-		else if (last_update != GM_getValue('timestamp', 0)) {
-			last_update = GM_getValue('timestamp', 0);
-			search_panel.parentElement && search_panel.parentElement.removeChild(search_panel);
-			setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
-			create_panel();
+		// GM 4.x api is async, so we cannot update it in time
+		else {
+			if (!asyncGMAPI) {
+				if (last_update != GM_getValue('timestamp', 0)) {
+					last_update = GM_getValue('timestamp', 0);
+					search_panel.parentElement && search_panel.parentElement.removeChild(search_panel);
+					setting = GM_getValue('setting') ? JSON.parse(GM_getValue('setting')) : default_setting;
+					create_panel();
+				}
+				else document.body.appendChild(search_panel);
+			}
+			else {
+				document.body.appendChild(search_panel);
+				GM_getValue('timestamp', 0).then(function (t) {
+					if (last_update != t) {
+						last_update = t;
+						search_panel.parentElement && search_panel.parentElement.removeChild(search_panel);
+						GM_getValue('setting').then(function (s) {
+							setting = s ? JSON.parse(s) : default_setting;
+						});
+					}
+				});
+			}
 		}
-		else document.body.appendChild(search_panel);
 		search_panel.style.left = (document.documentElement.offsetWidth + (document.documentElement.scrollLeft || document.body.scrollLeft) - event.pageX >= 200 ? event.pageX : event.pageX >= 200 ? event.pageX - 200 : 0) + 'px';
 		search_panel.style.top = (event.pageY + search_panel.offsetHeight < (document.documentElement.scrollTop || document.body.scrollTop) + document.documentElement.clientHeight ? event.pageY : event.pageY >= search_panel.scrollHeight ? event.pageY - search_panel.offsetHeight : 0) + 'px';
 		// Firefox doesn't support getComputedStyle(element).marginLeft/marginRight and it would return "0px" while the element's margin is "auto". See bugzila/381328.
@@ -415,7 +473,14 @@ document.addEventListener('mousedown', function(event) {
 				switch (event.target.getAttribute('search-option')) {
 					case 'all':
 						if (img_src != null) {
-							for (var i = setting.site_option.length - 1; i >= 0; i--) GM_openInTab(setting.site_list[setting.site_option[i]].replace(/\{%s\}/, encodeURIComponent(img_src)), event[setting.hot_key]);
+							for (var i = setting.site_option.length - 1; i >= 0; i--) {
+								var rsrc = img_src;
+								var turl = setting.site_list[setting.site_option[i]];
+								if (turl.substr(0, turl.indexOf('{%s}')).indexOf('?') >= 0) {
+									rsrc = encodeURIComponent(img_src);
+								}
+								GM_openInTab(turl.replace(/\{%s\}/, rsrc), event[setting.hot_key]);
+							}
 							hide_panel();
 						}
 						break;
@@ -425,7 +490,13 @@ document.addEventListener('mousedown', function(event) {
 						break;
 					default:
 						if (img_src != null) {
-							GM_openInTab(setting.site_list[event.target.getAttribute('search-option')].replace(/\{%s\}/, encodeURIComponent(img_src)), event[setting.hot_key]);
+							var rsrc = img_src;
+							var turl = setting.site_list[event.target.getAttribute('search-option')];
+							if (turl.substr(0, turl.indexOf('{%s}')).indexOf('?') >= 0) {
+								rsrc = encodeURIComponent(img_src);
+							}
+
+							GM_openInTab(turl.replace(/\{%s\}/, rsrc), event[setting.hot_key]);
 							hide_panel();
 						}
 				}
@@ -436,4 +507,7 @@ document.addEventListener('mousedown', function(event) {
 	}
 }, true);
 
-var gm_callsetting = GM_registerMenuCommand('Search By Image Setting', call_setting);
+if (typeof GM_registerMenuCommand !== 'undefined') {
+	var gm_callsetting = GM_registerMenuCommand('Search By Image Setting', call_setting);
+}
+init();
