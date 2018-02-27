@@ -73,6 +73,12 @@ Search By Image | 以图搜图
 > 另外，搜索贴吧内图片时，如果出现搜索的 url 为 base64 的情况，请看此贴：http://tieba.baidu.com/p/3145502558
 
 更新历史： 
+> 2018.02.27 1.6.1 Fix "All" search may broken due to not remove deleted search engines completely
+>
+> 2018.02.27 1.6 Add Ascii2D; Fix compatibility with GreaseMonkey 4.x
+>
+> 2017.11.16 1.5.1 Fix Firefox cannot paste image if the image is copied from Firefox
+>
 > 2017.07.18 1.5 修正百度、搜狗等搜索引擎 url，添加 whatanime.ga，修正 Google 搜图结果页不弹出搜索菜单的问题
 >
 > 2015.12.27 1.4.11 GreasyFork feedback [#7547](https://greasyfork.org/zh-CN/forum/discussion/7547/x) 搜索菜单在超出窗口可视大小时对其下边缘，按住热键时点击搜索菜单将在后台标签页打开，未按下时将在前台标签页打开

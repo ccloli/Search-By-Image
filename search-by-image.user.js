@@ -189,6 +189,17 @@ function init() {
 			GM_setValue('version', data_version = 5);
 		}
 
+		var repeatTest = {};
+		var finalOpt = [];
+		for (var i = 0, len = setting.site_option.length; i < len; i++) {
+			var cur = setting.site_option;
+			if (!repeatTest[cur] && setting.site_list[cur]) {
+				finalOpt.push(cur);
+				repeatTest[cur] = 1;
+			}
+		}
+		setting.site_option = finalOpt;
+
 		if (setting.server_url == null || setting.server_url == '') {
 			setting.server_url = default_setting.server_url;
 			set_setting(setting);
