@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.6
+// @version     1.6.1
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
