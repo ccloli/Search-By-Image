@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.6.1
+// @version     1.6.2
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -141,9 +141,9 @@ else {
 function init() {
 	return Promise.all([getValue('setting'), GM_getValue('version', 0), GM_getValue('timestamp', 0)]).then(function(res) {
 		var s = res[0], v = res[1], t = res[2];
-		var setting = s ? JSON.parse(s) : default_setting;
-		var data_version = v;
-		var last_update = t;
+		setting = s ? JSON.parse(s) : default_setting;
+		data_version = v;
+		last_update = t;
 
 		if (data_version < 5) {
 			if (data_version < 4) {
@@ -192,7 +192,7 @@ function init() {
 		var repeatTest = {};
 		var finalOpt = [];
 		for (var i = 0, len = setting.site_option.length; i < len; i++) {
-			var cur = setting.site_option;
+			var cur = setting.site_option[i];
 			if (!repeatTest[cur] && setting.site_list[cur]) {
 				finalOpt.push(cur);
 				repeatTest[cur] = 1;
@@ -372,7 +372,6 @@ function call_setting() {
 		}
 		setting = setting_data;
 		server_url = setting.server_url;
-		console.log(setting_data);
 		set_setting(setting);
 		document.body.removeChild(setting_panel);
 		if (search_panel != null) {
