@@ -33,7 +33,7 @@ if(empty($_REQUEST['imgdata'])==false){
 		}
 	}
 	$new_data.=$filename;
-	file_put_contents('data.txt',$new_data);
+	file_put_contents($datafile,$new_data);
 }
 exit;
 ?>
