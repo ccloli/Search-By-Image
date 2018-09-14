@@ -13,10 +13,11 @@ if(empty($_REQUEST['imgdata'])==false){
 	$time=time();
 	$timestr=dechex($time);
 	$ext=explode('/',$imgdata[1])[1];
-	if(empty($ext)){
+	if(empty($ext)||$ext==='jpeg'){
 		$ext='jpg';
 	}
-	$filename=strlen($timestr).$timestr.uniqid().'.'.$ext;
+	$ruid=substr('0000000'.dechex(mt_rand(0,0xfffffff)),-7);
+	$filename=strlen($timestr).$timestr.$ruid.'.'.$ext;
 	file_put_contents($filename,base64_decode($imgdata[2]));
 	echo $path.$filename;
 	$data=explode(' ',file_get_contents($datafile));
