@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.6.2
+// @version     1.6.3
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -43,7 +43,7 @@ var default_setting = {
 		"SauceNAO": "https://saucenao.com/search.php?db=999&url={%s}",
 		"IQDB": "https://iqdb.org/?url={%s}",
 		"3D IQDB": "https://3d.iqdb.org/?url={%s}",
-		"WhatAnime": "https://whatanime.ga/?url={%s}",
+		"WhatAnime": "https://trace.moe/?url={%s}",
 		"Ascii2D": "https://ascii2d.net/search/url/{%s}"
 	},
 	"site_option": ["Google", "Baidu", "Bing", "TinEye", "Yandex", "Sogou", "360 ShiTu", "SauceNAO", "IQDB", "3D IQDB", "WhatAnime", "Ascii2D"],
@@ -145,48 +145,53 @@ function init() {
 		data_version = v;
 		last_update = t;
 
-		if (data_version < 5) {
-			if (data_version < 4) {
-				var new_site_list = {};
-				var new_site_option = [];
+		if (data_version < 6) {
+			if (data_version < 5) {
+				if (data_version < 4) {
+					var new_site_list = {};
+					var new_site_option = [];
 
-				for (var i in setting.site_list) {
-					// use for loop to keep order, will use array in 2.x
-					switch (i) {
-						case 'Baidu ShiTu':
-						case 'Baidu Image':
-							new_site_list['Baidu'] = default_setting.site_list['Baidu'];
-							break;
+					for (var i in setting.site_list) {
+						// use for loop to keep order, will use array in 2.x
+						switch (i) {
+							case 'Baidu ShiTu':
+							case 'Baidu Image':
+								new_site_list['Baidu'] = default_setting.site_list['Baidu'];
+								break;
 
-						case 'Bing':
-						case 'Sogou':
-							new_site_list[i] = default_setting.site_list[i];
-							break;
+							case 'Bing':
+							case 'Sogou':
+								new_site_list[i] = default_setting.site_list[i];
+								break;
 
-						default:
-							new_site_list[i] = setting.site_list[i];
+							default:
+								new_site_list[i] = setting.site_list[i];
+						}
 					}
+					new_site_list['WhatAnime'] = default_setting.site_list['WhatAnime'];
+
+					for (var i = 0; i < setting.site_option.length; i++) {
+						if ((setting.site_option[i] === 'Baidu ShiTu' || setting.site_option[i] === 'Baidu Image') && !(/,?Baidu,?/.test(new_site_option.join(',')))) {
+							new_site_option.push('Baidu');
+						}
+						else {
+							new_site_option.push(setting.site_option[i]);
+						}
+					}
+					new_site_option.push('WhatAnime');
+
+					setting.site_list = new_site_list;
+					setting.site_option = new_site_option;
 				}
-				new_site_list['WhatAnime'] = default_setting.site_list['WhatAnime'];
 
-				for (var i = 0; i < setting.site_option.length; i++) {
-					if ((setting.site_option[i] === 'Baidu ShiTu' || setting.site_option[i] === 'Baidu Image') && !(/,?Baidu,?/.test(new_site_option.join(',')))) {
-						new_site_option.push('Baidu');
-					}
-					else {
-						new_site_option.push(setting.site_option[i]);
-					}
-				}
-				new_site_option.push('WhatAnime');
-
-				setting.site_list = new_site_list;
-				setting.site_option = new_site_option;
+				setting.site_list['Ascii2D'] = default_setting.site_list['Ascii2D'];
+				setting.site_option.push('Ascii2D');
 			}
-
-			setting.site_list['Ascii2D'] = default_setting.site_list['Ascii2D'];
-			setting.site_option.push('Ascii2D');
-			set_setting(setting);
-			GM_setValue('version', data_version = 5);
+			if (setting.site_list['WhatAnime']) {
+				setting.site_list['WhatAnime'] = default_setting.site_list['WhatAnime'];
+				set_setting(setting);
+			}
+			GM_setValue('version', data_version = 6);
 		}
 
 		var repeatTest = {};
