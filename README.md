@@ -73,6 +73,9 @@ Search By Image | 以图搜图
 > 另外，搜索贴吧内图片时，如果出现搜索的 url 为 base64 的情况，请看此贴：http://tieba.baidu.com/p/3145502558
 
 更新历史：
+
+> 2019.01.18 1.6.4 Support Blob URL and FileSystem URL ([#6](https://github.com/ccloli/Search-By-Image/issues/6))
+
 > 2018.10.26 1.6.3 Update WhatAnime to `trace.moe` ([#5](https://github.com/ccloli/Search-By-Image/issues/5))
 > 
 > 2018.03.04 1.6.2 Fix setting is not loaded; Fix previous fixes is not working (Fix GreasyFork [#31706](https://greasyfork.org/en/forum/discussion/31706/x), these bugs makes WhatAnime & Ascii2D save twice or more times.)

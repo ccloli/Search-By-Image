@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.6.3
+// @version     1.6.4
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -425,6 +425,20 @@ function hide_panel() {
 	document.removeEventListener('paste', get_clipboard, false);
 }
 
+function upload_blob_url(url) {
+	if (!url) return;
+	var req = new XMLHttpRequest();
+	req.open('GET', url);
+	req.responseType = 'blob';
+	req.onload = function() {
+		reader.readAsDataURL(req.response);
+	};
+	req.onerror = function() {
+		alert(i18n[lang]['uf']);
+	};
+	req.send();
+}
+
 document.addEventListener('mousedown', function(event) {
 	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target:'+event.target+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
 	if (disable_contextmenu == true) {
@@ -469,7 +483,8 @@ document.addEventListener('mousedown', function(event) {
 		if (event.target.tagName.toLowerCase() == 'img' && event.target.src != null) {
 			search_panel.getElementsByClassName('search_top_url')[0].style.marginTop = '0px';
 			search_panel.getElementsByClassName('search_top_url')[0].textContent = event.target.src;
-			if (event.target.src.match(/^data:\s*.*?;\s*base64,\s*/) != null) upload_file(event.target.src);
+			if (/^data:\s*.*?;\s*base64,\s*/.test(event.target.src)) upload_file(event.target.src);
+			else if (/^(?:blob:|filesystem:)/.test(event.target.src)) upload_blob_url(event.target.src);
 			else img_src = event.target.src;
 		}
 		else {
