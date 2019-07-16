@@ -74,8 +74,10 @@ Search By Image | 以图搜图
 
 更新历史：
 
+> 2019.07.16 1.6.5 Support latest Baidu Graph (See Greasyfork [#60156](https://greasyfork.org/zh-CN/forum/discussion/60156))
+>
 > 2019.01.18 1.6.4 Support Blob URL and FileSystem URL ([#6](https://github.com/ccloli/Search-By-Image/issues/6))
-
+>
 > 2018.10.26 1.6.3 Update WhatAnime to `trace.moe` ([#5](https://github.com/ccloli/Search-By-Image/issues/5))
 > 
 > 2018.03.04 1.6.2 Fix setting is not loaded; Fix previous fixes is not working (Fix GreasyFork [#31706](https://greasyfork.org/en/forum/discussion/31706/x), these bugs makes WhatAnime & Ascii2D save twice or more times.)
