@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.6.6
+// @version     1.6.7
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -450,7 +450,7 @@ function upload_blob_url(url) {
 	req.send();
 }
 
-document.addEventListener('mousedown', function(event) {
+document.addEventListener(document.onpointerdown === undefined ? 'mousedown' : 'pointerdown', function(event) {
 	//console.log('Search Image >>\nevent.ctrlKey: '+event.ctrlKey+'\nevent.button: '+event.button+'\nevent.target:'+event.target+'\nevent.target.tagName: '+event.target.tagName+'\nevent.target.src: '+event.target.src+'\nevent.pageX: '+event.pageX+'\nevent.pageY: '+event.pageY+'\ndocument.documentElement.clientWidth: '+document.documentElement.clientWidth+'\ndocument.documentElement.clientHeight: '+document.documentElement.clientHeight+'\ndocument.documentElement.scrollWidth: '+document.documentElement.scrollWidth+'\ndocument.documentElement.scrollHeight: '+document.documentElement.scrollHeight+'\ndocument.documentElement.scrollLeft: '+document.documentElement.scrollLeft+'\ndocument.documentElement.scrollTop: '+document.documentElement.scrollTop);
 	if (disable_contextmenu == true) {
 		document.oncontextmenu = null;
