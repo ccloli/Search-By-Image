@@ -74,8 +74,10 @@ Search By Image | 以图搜图
 
 更新历史：
 
+> 2022.04.02 1.6.7 Fix cannot show the panel in some specific cases
+>
 > 2020.03.08 1.6.6 Update Yandex url pattern (See Greasyfork [#72081](https://greasyfork.org/zh-CN/forum/discussion/72081/x))
-
+>
 > 2019.07.16 1.6.5 Support latest Baidu Graph (See Greasyfork [#60156](https://greasyfork.org/zh-CN/forum/discussion/60156))
 >
 > 2019.01.18 1.6.4 Support Blob URL and FileSystem URL ([#6](https://github.com/ccloli/Search-By-Image/issues/6))
