@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Search By Image
-// @version     1.6.8
+// @version     1.6.9
 // @description Search By Image | 以图搜图
 // @match       <all_urls>
 // @include     *
@@ -38,7 +38,7 @@ var default_setting = {
 		"TinEye": "https://www.tineye.com/search?url={%s}",
 		//"Cydral": "http://www.cydral.com/#url={%s}",
 		"Yandex": "https://yandex.com/images/search?rpt=imageview&url={%s}", // change "Яндекс (Yandex)" to "Yandex"
-		"Sogou": "https://pic.sogou.com/ris?query={%s}&flag=1&drag=0",
+		"Sogou": "https://pic.sogou.com/ris?query=https%3A%2F%2Fimg03.sogoucdn.com%2Fv2%2Fthumb%2Fretype_exclude_gif%2Fext%2Fauto%3Fappid%3D122%26url%3D{%ss}&flag=1&drag=0",
 		"360 ShiTu": "http://st.so.com/stu?imgurl={%s}",
 		"SauceNAO": "https://saucenao.com/search.php?db=999&url={%s}",
 		"IQDB": "https://iqdb.org/?url={%s}",
@@ -205,6 +205,9 @@ function init() {
 			8: function () {
 				if (setting.site_list['Google']) {
 					setting.site_list['Google'] = default_setting.site_list['Google'];
+				}
+				if (setting.site_list['Sogou']) {
+					setting.site_list['Sogou'] = default_setting.site_list['Sogou'];
 				}
 			}
 		}
@@ -531,10 +534,13 @@ document.addEventListener(document.onpointerdown === undefined ? 'mousedown' : '
 							for (var i = setting.site_option.length - 1; i >= 0; i--) {
 								var rsrc = img_src;
 								var turl = setting.site_list[setting.site_option[i]];
-								if (turl.substr(0, turl.indexOf('{%s}')).indexOf('?') >= 0) {
-									rsrc = encodeURIComponent(img_src);
+								if (turl.split(/{%s+}/).shift().indexOf('?') >= 0) {
+									var token = turl.match(/{%s+}/)[0];
+									for (var j = 0; j < token.length - 3; j++) {
+										rsrc = encodeURIComponent(rsrc);
+									}
 								}
-								GM_openInTab(turl.replace(/\{%s\}/, rsrc), event[setting.hot_key]);
+								GM_openInTab(turl.replace(/{%s+}/, rsrc), event[setting.hot_key]);
 							}
 							hide_panel();
 						}
@@ -547,11 +553,14 @@ document.addEventListener(document.onpointerdown === undefined ? 'mousedown' : '
 						if (img_src != null) {
 							var rsrc = img_src;
 							var turl = setting.site_list[event.target.getAttribute('search-option')];
-							if (turl.substr(0, turl.indexOf('{%s}')).indexOf('?') >= 0) {
-								rsrc = encodeURIComponent(img_src);
+							if (turl.split(/{%s+}/).shift().indexOf('?') >= 0) {
+								var token = turl.match(/{%s+}/)[0];
+								for (var j = 0; j < token.length - 3; j++) {
+									rsrc = encodeURIComponent(rsrc);
+								}
 							}
 
-							GM_openInTab(turl.replace(/\{%s\}/, rsrc), event[setting.hot_key]);
+							GM_openInTab(turl.replace(/{%s+}/, rsrc), event[setting.hot_key]);
 							hide_panel();
 						}
 				}

@@ -74,6 +74,8 @@ Search By Image | 以图搜图
 
 更新历史：
 
+> 2022.11.13 1.6.9 Fix Sogou search url pattern (Sogou requires using its CDN to forward as whitelist)
+>
 > 2022.11.13 1.6.8 Change Google search to Google Lens
 >
 > 2022.04.02 1.6.7 Fix cannot show the panel in some specific cases
