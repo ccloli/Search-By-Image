@@ -74,6 +74,8 @@ Search By Image | 以图搜图
 
 更新历史：
 
+> 2022.11.13 1.6.8 Change Google search to Google Lens
+>
 > 2022.04.02 1.6.7 Fix cannot show the panel in some specific cases
 >
 > 2020.03.08 1.6.6 Update Yandex url pattern (See Greasyfork [#72081](https://greasyfork.org/zh-CN/forum/discussion/72081/x))
